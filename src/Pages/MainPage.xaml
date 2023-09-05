@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ButtonSpinner.Pages.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:ButtonSpinner.Controls"
+    xmlns:viewmodels="clr-namespace:ButtonSpinner.ViewModels"
+    Title="Button Demo"
+    x:DataType="viewmodels:MainViewModel">
+    <VerticalStackLayout
+        HorizontalOptions="Center"
+        Spacing="20"
+        VerticalOptions="Center">
+        <Label Text="Vanilla Button" />
+        <Button
+            Margin="0,0,0,20"
+            Command="{Binding DoSomethingCommand}"
+            Text="Vanilla Button" />
+
+        <Label Text="Button Spinner" />
+        <controls:ButtonSpinner
+            Margin="0,0,0,20"
+            Command="{Binding DoSomethingCommand}"
+            Text="Spinner Button" />
+
+        <Label Text="Button Spinner With Parameter" />
+        <controls:ButtonSpinner
+            Command="{Binding DoSomethingWithParameterCommand}"
+            CommandParameter="Hello World"
+            Text="Parameter Spinner" />
+    </VerticalStackLayout>
+</ContentPage>
