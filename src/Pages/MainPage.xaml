@@ -21,7 +21,19 @@
         <controls:ButtonSpinner
             Margin="0,0,0,20"
             Command="{Binding DoSomethingCommand}"
-            Text="Spinner Button" />
+            Text="Button Spinner" />
+
+        <Label Text="Styled Spinner" />
+        <controls:ButtonSpinner
+            Margin="0,0,0,20"
+            BackgroundColor="LightBlue"
+            Command="{Binding DoSomethingCommand}"
+            CornerRadius="0"
+            FontAttributes="Bold"
+            FontSize="Title"
+            IndicatorColor="Yellow"
+            Text="Styled Spinner"
+            TextColor="Red" />
 
         <Label Text="Button Spinner With Parameter" />
         <controls:ButtonSpinner

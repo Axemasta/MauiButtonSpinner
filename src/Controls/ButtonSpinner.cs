@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Windows.Input;
 
 namespace ButtonSpinner.Controls;
@@ -22,20 +17,32 @@ public class ButtonSpinner : ContentView
 
     #region Bindable Properties (Static)
 
-    public static BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(ButtonSpinner), string.Empty, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
+    public static readonly new BindableProperty BackgroundColorProperty = BindableProperty.Create(nameof(BackgroundColor), typeof(Color), typeof(ButtonSpinner), Colors.White, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
 
-    public static BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(ButtonSpinner), propertyChanged: OnCommandPropertyChanged);
+    public static readonly BindableProperty CommandProperty = BindableProperty.Create(nameof(Command), typeof(ICommand), typeof(ButtonSpinner), propertyChanged: OnCommandPropertyChanged);
 
-    public static BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(ButtonSpinner));
+    public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(ButtonSpinner));
+
+    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(nameof(CornerRadius), typeof(int), typeof(Button), defaultValue: -1);
+
+    public static readonly BindableProperty FontAttributesProperty = BindableProperty.Create(nameof(FontAttributes), typeof(FontAttributes), typeof(ButtonSpinner), FontAttributes.None, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
+
+    public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(nameof(FontSize), typeof(double), typeof(ButtonSpinner), 0d, propertyChanged: OnValuePropertyChanged);
+
+    public static readonly BindableProperty IndicatorColorProperty = BindableProperty.Create(nameof(IndicatorColor), typeof(Color), typeof(ButtonSpinner), Colors.Black, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
+
+    public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(ButtonSpinner), string.Empty, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
+
+    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(nameof(TextColor), typeof(Color), typeof(ButtonSpinner), Colors.Black, BindingMode.OneWay, propertyChanged: OnValuePropertyChanged);
 
     #endregion Bindable Properties (Static)
 
     #region Bindable Properties (Instance)
 
-    public string Text
+    public new Color BackgroundColor
     {
-        get => (string)GetValue(TextProperty); 
-        set => SetValue(TextProperty, value);
+        get => (Color)GetValue(BackgroundColorProperty);
+        set => SetValue(BackgroundColorProperty, value);
     }
 
     public ICommand Command
@@ -50,22 +57,66 @@ public class ButtonSpinner : ContentView
         set => SetValue(CommandParameterProperty, value);
     }
 
-    #endregion Bindable Properties (Instance)
+    public int CornerRadius
+    {
+        get => (int)GetValue(CornerRadiusProperty);
+        set => SetValue(CornerRadiusProperty, value);
+    }
 
-    private Color originalTextColor;
+    public FontAttributes FontAttributes
+    {
+        get => (FontAttributes)GetValue(FontAttributesProperty);
+        set => SetValue(FontAttributesProperty, value);
+    }
+
+    [System.ComponentModel.TypeConverter(typeof(FontSizeConverter))]
+    public double FontSize
+    {
+        get => (double)GetValue(FontSizeProperty);
+        set => SetValue(FontAttributesProperty, value);
+    }
+
+    public Color IndicatorColor
+    {
+        get => (Color)GetValue(IndicatorColorProperty);
+        set => SetValue(IndicatorColorProperty, value);
+    }
+
+    public string Text
+    {
+        get => (string)GetValue(TextProperty); 
+        set => SetValue(TextProperty, value);
+    }
+
+    public Color TextColor
+    {
+        get => (Color)GetValue(TextColorProperty);
+        set => SetValue(TextColorProperty, value);
+    }
+
+    #endregion Bindable Properties (Instance)
 
     public ButtonSpinner()
     {
-        ContainerGrid = new Grid();
-        Button = new Button();
+        ContainerGrid = new Grid()
+        {
+            BackgroundColor = Colors.Transparent,
+        };
+
+        Button = new Button()
+        {
+            BackgroundColor = BackgroundColor,
+            TextColor = TextColor,
+            FontAttributes = FontAttributes,
+        };
+
         ActivityIndicator = new ActivityIndicator()
         {
             IsVisible = false,
             HorizontalOptions = LayoutOptions.Fill,
             VerticalOptions = LayoutOptions.Fill,
+            Color = IndicatorColor,
         };
-
-        this.originalTextColor = Button.TextColor;
 
         this.ContainerGrid.Children.Add(Button);
         this.ContainerGrid.Children.Add(ActivityIndicator);
@@ -92,10 +143,28 @@ public class ButtonSpinner : ContentView
     private void OnValuePropertyChanged()
     {
         Button.BatchBegin();
+        ActivityIndicator.BatchBegin();
 
+        ActivityIndicator.Color = IndicatorColor;
+
+        Button.Background = BackgroundColor;
+        Button.FontAttributes = FontAttributes;
         Button.Text = Text;
+        Button.TextColor = TextColor;
+
+        if (FontSize >= 1)
+        {
+            // Maui internals were internal so this is a bit of a hacky workaround
+            Button.FontSize = FontSize;
+        }
+
+        if (CornerRadius > -1)
+        {
+            Button.CornerRadius = CornerRadius;
+        }
 
         Button.BatchCommit();
+        ActivityIndicator.BatchCommit();
     }
 
     private void OnCommandPropertyChanged(ICommand newCommand)
@@ -124,7 +193,7 @@ public class ButtonSpinner : ContentView
         {
             Debug.WriteLine("Hide Spinner");
 
-            Button.TextColor = originalTextColor;
+            Button.TextColor = TextColor;
 
             await ActivityIndicator.FadeTo(0, 250, Easing.CubicInOut);
 
